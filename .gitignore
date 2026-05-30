@@ -1,0 +1,16 @@
+# Секреты — НИКОГДА не коммитить
+*.yaml
+*.yml
+google-ads.yaml
+yandex-direct.yaml
+.env
+
+# Результаты прогонов
+*.xlsx
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
