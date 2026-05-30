@@ -1,14 +1,13 @@
 # =====================================================================
 # ФОКУС-ЗАСЕВ: проектирование проектной документации + прохождение Госэкспертизы
-# Регион: Казахстан (GeoID 159). Язык запросов — русский.
+# Гео: Казахстан (location_code 2398). Язык запросов — русский (ru).
 #
-# Веб-путь (рабочий): на wordstat.yandex.ru поставь регион «Казахстан»,
-#   вбивай фразы по очереди, вкладка «Топы запросов» → «Скачать» → phrase.xlsx,
-#   затем: python scripts/wordstat_client.py import --file phrase.xlsx --out ../kz_yandex.xlsx
-# API-путь (когда будет токен Директа):
-#   python scripts/wordstat_client.py ideas --phrases-file seeds_pd_gosexpertiza.txt --geo 159 --out ../kz_yandex.xlsx
+# Запуск (DataForSEO, объёмы + идеи):
+#   python scripts/gkp_client.py ideas --phrases-file seeds_pd_gosexpertiza.txt --geo 2398 --lang-code ru --out ../kz_google.xlsx
+# Только объёмы по точным фразам:
+#   python scripts/gkp_client.py volume --phrases-file seeds_pd_gosexpertiza.txt --geo 2398 --lang-code ru --out ../kz_google.xlsx
 #
-# Строки с # игнорируются. Это «семена» — Wordstat сам раскроет хвост по каждому.
+# Строки с # игнорируются. Это «семена» — режим ideas раскроет хвост по каждому.
 # =====================================================================
 
 # --- БЛОК 1: разработка / проектирование проектной документации ---

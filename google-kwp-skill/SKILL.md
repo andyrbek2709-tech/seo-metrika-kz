@@ -9,7 +9,6 @@ description: |
   - упоминает Keyword Planner, планировщик ключевых слов, Google Ads, объём поиска Google
   По умолчанию работает через DataForSEO (без аккаунта Google Ads и без карты, нужен лишь
   логин/пароль DataForSEO); опционально — официальный Google Ads API. См. references/setup.md.
-  Для спроса в Яндексе используй парный навык wordstat.
 ---
 
 # Навык: Google Keyword Planner (Google Ads API)
@@ -22,8 +21,8 @@ description: |
 спроса** на рынках, где Google доминирует (включая KZ).
 
 Принцип WAT: AI-решения — в чате; вызовы API и запись Excel делает
-`scripts/gkp_client.py`. Формат вывода совместим с навыком `wordstat` —
-результаты двух источников можно сравнивать и сливать.
+`scripts/gkp_client.py`. Вывод (.xlsx) подхватывает `product-discovery-skill`
+для кластеризации спроса по темам рынка.
 
 ---
 
@@ -105,10 +104,10 @@ python scripts/gkp_client.py ideas --phrases-file seeds_discovery.txt \
 Дальше в чате: сопоставить объёмы по аренам → найти «gap»-запросы → гипотезы продукта.
 (Через официальный API — добавь `--backend ads --customer <ID> --lang 1031`.)
 
-### 3. Кросс-источник: Google vs Яндекс
-Прогони те же `seeds_discovery.txt` здесь и в навыке `wordstat`. Где источники
-расходятся по объёму/составу запросов — там видно, на каком рынке и в какой
-поисковой системе ниша живее.
+### 3. От спроса к продуктовым идеям
+Выход `.xlsx` передай в `product-discovery-skill`:
+`cluster_demand.py --xlsx kz_google.xlsx --out themes.xlsx` — кластеризация в темы
+рынка, дальше отчёт идей продуктов по `assets/report_template.md`.
 
 ---
 
@@ -125,4 +124,4 @@ python scripts/gkp_client.py ideas --phrases-file seeds_discovery.txt \
 ## Ссылки
 - `references/setup.md` — авторизация Google Ads API (developer-токен, OAuth, customer_id).
 - `references/geo_targets.md` — ID стран и языков, примеры сравнительных прогонов.
-- `seeds_discovery.txt` — общий засев (тот же, что в навыке wordstat).
+- `seeds_discovery.txt` — общий засев по трём аренам (A/B/C); фокус-засевы — `seeds_*.txt`.

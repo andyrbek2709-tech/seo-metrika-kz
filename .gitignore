@@ -2,7 +2,7 @@
 *.yaml
 *.yml
 google-ads.yaml
-yandex-direct.yaml
+dataforseo.yaml
 .env
 
 # Результаты прогонов

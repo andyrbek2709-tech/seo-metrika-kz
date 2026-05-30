@@ -5,8 +5,8 @@ gkp_client.py — детерминированный клиент Google Keyword
 Принцип WAT: AI-решения (подбор засева, кластеризация, выводы) — в чате.
 Этот инструмент только дёргает API и пишет файлы.
 
-Формат вывода совместим с wordstat_client.py, чтобы потом склеить в один
-провайдер-агностичный skill `search-demand`.
+Формат вывода (7-колоночная .xlsx) подхватывает product-discovery-skill
+для кластеризации спроса по темам рынка.
 
 Авторизация: через google-ads.yaml (по умолчанию ~/google-ads.yaml) или переменные
 окружения GOOGLE_ADS_*. Customer ID — флаг --customer или env GOOGLE_ADS_CUSTOMER_ID.
@@ -141,7 +141,7 @@ def _generate(client, customer_id: str, phrases: List[str],
 # ---------------------------------------------------------------------------
 # Бэкенд DataForSEO (Путь C — те же объёмы Keyword Planner по KZ,
 # но без аккаунта Google Ads и без карты; нужен только логин/пароль DataForSEO).
-# Выдаёт ту же 7-колоночную схему, что и Google Ads API и wordstat.
+# Выдаёт ту же 7-колоночную схему, что и Google Ads API.
 # ---------------------------------------------------------------------------
 
 def _read_yaml_kv(path: str, keys: set) -> Dict[str, str]:
@@ -263,7 +263,7 @@ def _generate_dfs(auth: str, phrases: List[str], location_code: int,
 # Веб-Планировщик (ads.google.com → Инструменты → Планировщик ключевых слов)
 # работает с любым бесплатным аккаунтом Google Ads, без developer-токена и без
 # одобрения Basic access. Кнопка «Скачать варианты ключевых слов» отдаёт CSV.
-# Этот режим приводит такой CSV к нашей схеме .xlsx (как у API-пути и wordstat).
+# Этот режим приводит такой CSV к нашей схеме .xlsx (как у API-пути).
 # ---------------------------------------------------------------------------
 
 # Алиасы заголовков Google Keyword Planner (en + ru-локаль экспорта).
@@ -411,7 +411,7 @@ def import_csv(csv_path: str) -> List[Dict[str, Any]]:
 
 
 # ---------------------------------------------------------------------------
-# Excel (тот же формат, что и в wordstat_client.py)
+# Excel (7-колоночная схема навыка)
 # ---------------------------------------------------------------------------
 
 def write_xlsx(path: str, sheet_name: str, rows: List[Dict[str, Any]]) -> None:

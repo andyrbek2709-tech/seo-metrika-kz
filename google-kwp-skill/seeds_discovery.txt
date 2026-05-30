@@ -2,7 +2,7 @@
 # DISCOVERY-ЗАСЕВ: что ищут проектировщики и эксперты
 # Запуск (DataForSEO, по умолчанию):  python scripts/gkp_client.py ideas --phrases-file seeds_discovery.txt --geo 2398 --lang-code ru --out discovery.xlsx
 # Запуск (Google Ads API):           python scripts/gkp_client.py ideas --phrases-file seeds_discovery.txt --backend ads --customer XXXXXXXXXX --out discovery.xlsx
-# Тот же засев лежит в навыке wordstat — для кросс-источникового сравнения Google vs Яндекс.
+# Сравнение по гео (KZ vs РФ) — тот же засев с разным --geo (2398 / 2643).
 # Строки, начинающиеся с #, игнорируются. Правь под себя.
 # =====================================================================
 

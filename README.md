@@ -1,97 +1,85 @@
-# SEO метрика — оценка поискового спроса (Google + Яндекс)
+# SEO метрика — оценка поискового спроса в Google (KZ)
 
-Коллекция парных навыков для съёма поискового спроса и **discovery-исследования рынка**
-KZ/СНГ. Главная задача проекта — данными ответить на вопрос:
+Навыки для съёма поискового спроса в **Google** и **discovery-исследования рынка** KZ/СНГ.
+Главная задача проекта — данными ответить на вопрос:
 
-> **Где KZ-инженеры, проектировщики и эксперты Госэкспертизы делают больше поисковых
-> запросов — в Google или в Яндексе, и в каких темах?**
+> **Что и сколько ищут в Google KZ-инженеры, проектировщики и эксперты Госэкспертизы —
+> и какие из этих тем стоит закрывать продуктом?**
 
 Под это заточен продукт по экспертизе/проверке проектной документации.
 
-> **Статус источников (2026-05-30):** оба источника рабочие через **ручную веб-выгрузку**,
-> без карт и API-токенов.
-> - **Google Trends** (`gtrends-skill`) — относительный интерес 0–100 по KZ, без аккаунта.
-> - **Яндекс Wordstat** (`wordstat-skill import`) — `wordstat.yandex.ru` открывается обычным
->   аккаунтом Яндекса и даёт **абсолютные числа** + разбивку по регионам KZ. Блокировка
->   через Госуслуги РФ касалась только регистрации API Яндекс.Директа, а не веб-Wordstat.
-> - Абсолютные числа Google даёт только Keyword Planner (`google-kwp-skill`) — нужен аккаунт
->   Google Ads с картой, поэтому отложен; API-команды `wordstat ideas/volume` тоже требуют
->   доступа к Директу (заблокирован).
+> **Статус источника (2026-05-30):** абсолютные числа Google **снимаются автоматически
+> через DataForSEO** (бэкенд `--backend dataforseo`, по умолчанию): объёмы поиска,
+> конкуренция и ставки по KZ **без аккаунта Google Ads и без карты** — нужен лишь
+> логин/пароль DataForSEO. Опционально — официальный Google Ads API (`--backend ads`,
+> требует карту) или бесплатный ручной `import` CSV из веб-Планировщика.
 
-## Два навыка (инструменты съёма спроса)
+## Навыки
 
-| Навык | Источник | Что даёт | Чего нет |
-|---|---|---|---|
-| `google-kwp-skill/` | Google Ads API (Keyword Planner) | объёмы, идеи ключей, **конкуренция и ставки** | без spend — диапазоны, не точные числа |
-| `wordstat-skill/` | Yandex Direct API (Wordstat) | **точная частотность** (показы), связанные запросы, богатый хвост | нет рекламных метрик |
+| Навык | Что делает |
+|---|---|
+| `google-kwp-skill/` | Съём спроса Google (Keyword Planner через DataForSEO): объёмы, идеи ключей, конкуренция, ставки. Гео KZ и другие страны. |
+| `product-discovery-skill/` | Оркестратор: превращает съём спроса в продуктовые идеи — генерация запросов → кластеризация в темы → отчёт с идеями на Claude. |
 
-Оба пишут `.xlsx` с **идентичной схемой колонок** (`запрос, тип, ср_частота_мес,
-конкуренция, индекс_конкуренции, ставка_верх_TOP, ставка_низ_TOP`) — поэтому два файла
-сливаются в один сравнительный разбор.
+`google-kwp-skill` пишет `.xlsx` со схемой `запрос, тип, ср_частота_мес, конкуренция,
+индекс_конкуренции, ставка_верх_TOP, ставка_низ_TOP`. `product-discovery-skill` читает
+этот файл и кластеризует спрос по темам рынка.
 
-## Роли источников для KZ-аудитории
+## Как запустить (DataForSEO, без аккаунта Google и без карты)
 
-- **Google** — реальная аудитория Казахстана (~95% поиска в стране). Главный сигнал
-  по объёму спроса KZ-инженеров и экспертов.
-- **Яндекс Wordstat** — точные числа и глубокий проф-хвост русскоязычного рынка
-  (преимущественно РФ). Ценен для калибровки и расширения семантики, не для замера KZ-объёма.
+Нужен логин/пароль DataForSEO в `~/dataforseo.yaml` (см. `google-kwp-skill/references/setup.md`):
 
-Расхождение источников по конкретной фразе = сигнал, где ниша живее.
-
-## Как запустить (Google Trends, бесплатно — без аккаунта и карты)
-
-```bash
-cd gtrends-skill
-# 1. trends.google.com → регион Казахстан, период 12 мес. Сравнить фразы арены (≤5),
-#    в каждый батч добавить анкор «проектная документация» → «Скачать» → A.csv, B.csv, C.csv.
-# 2. Свести в единую шкалу по анкору:
-python scripts/trends_import.py --csv A.csv B.csv C.csv \
-  --anchor "проектная документация" --out ../kz_trends.xlsx
-```
-
-Альтернатива (абсолютные числа, требует аккаунта Google Ads + карту) — Keyword Planner:
 ```bash
 cd google-kwp-skill
-# веб-Планировщик → «Скачать варианты ключевых слов» → CSV
+
+# объёмы + расширение семантики (идеи) по KZ
+python scripts/gkp_client.py ideas --phrases-file seeds_discovery.txt \
+  --geo 2398 --lang-code ru --out ../kz_google.xlsx
+
+# только объёмы по точным фразам
+python scripts/gkp_client.py volume --phrases "проектная документация" "госэкспертиза" \
+  --geo 2398 --lang-code ru --out ../kz_google.xlsx
+```
+
+Бесплатная альтернатива без API — ручной экспорт CSV из веб-Планировщика Google:
+```bash
 python scripts/gkp_client.py import --csv ~/Downloads/keyword_ideas.csv --out ../kz_google.xlsx
 ```
 
-Альтернатива — автоматизированный API-путь (нужен developer-токен + OAuth, см.
-`references/setup.md`):
+Сравнить спрос KZ vs РФ — тот же засев, другое гео (`--geo 2643` = Россия).
+
+## От спроса к продуктовым идеям
+
 ```bash
-python scripts/gkp_client.py ideas --phrases-file seeds_discovery.txt \
-  --geo 2398 --customer XXXXXXXXXX --out ../kz_google.xlsx
+cd product-discovery-skill
+# 1. расширить семена в веер запросов по намерениям (info/howto/cost/problem/geo)
+python scripts/expand_seeds.py --seeds ../google-kwp-skill/seeds_pd_gosexpertiza.txt --out candidates.txt
+# 2. снять спрос через google-kwp-skill (см. выше) → kz_google.xlsx
+# 3. кластеризовать в темы рынка
+python scripts/cluster_demand.py --xlsx ../kz_google.xlsx --out themes.xlsx
+# 4. заполнить отчёт идей продуктов поверх данных (assets/report_template.md)
 ```
 
-Яндекс Wordstat (бесплатно — обычный аккаунт Яндекса, без Директа и карты):
-```bash
-cd wordstat-skill
-# wordstat.yandex.ru → регион Казахстан → фраза → вкладка «Топы запросов» → «Скачать»
-python scripts/wordstat_client.py import --file ~/Downloads/phrase.xlsx --out ../kz_yandex.xlsx
-```
-
-Затем свести в `АНАЛИЗ_KZ_Google_vs_Yandex.md` (шаблон уже в репозитории): агрегировать
-по трём аренам засева (A — экспертиза/нормоконтроль, B — широкий инженерный, C —
-AI-автоматизация), сравнить объём и состав, вынести вердикт «где больше».
+Итог сводится в `АНАЛИЗ_KZ_Google_спрос.md` (агрегация по трём аренам засева: A —
+экспертиза/нормоконтроль, B — широкий инженерный, C — AI-автоматизация).
 
 ## Доступы (один раз)
 
-- Google: `google-kwp-skill/references/setup.md` (developer-токен, OAuth, customer_id).
-- Яндекс: `wordstat-skill/references/setup.md` (OAuth-токен Яндекс.Директа).
+- DataForSEO: `google-kwp-skill/references/setup.md` (логин/пароль, `~/dataforseo.yaml`).
 
 Токены и `*.yaml` закрыты `.gitignore` — не коммитятся.
 
-## Засев
+## Засевы
 
-`seeds_discovery.txt` (копия в каждом навыке) — общий список фраз по трём аренам.
-Правится под конкретный discovery-вопрос.
+В `google-kwp-skill/`:
+- `seeds_discovery.txt` — общий засев по трём аренам (A/B/C).
+- `seeds_gosexpertiza.txt` — расчёты / МОПБ / замечания Госэкспертизы.
+- `seeds_pd_gosexpertiza.txt` — разработка ПД + прохождение Госэкспертизы.
+- `seeds_problem_sections.txt` — проблемные разделы ПД (МОПБ, конструктив, сметы…).
 
 ## Статус
 
-- [x] `gtrends-skill` — реализован; импорт Trends CSV + нормировка по анкору, без аккаунта/карты.
-- [x] `google-kwp-skill` — реализован; режим `import` (CSV из веб-Планировщика, нужен аккаунт+карта).
-- [x] `wordstat-skill` — реализован; режим `import` (веб-выгрузка Wordstat, **рабочий, без API/карты**).
-- [ ] Выгрузить батчи Trends по KZ (арены A/B/C + анкор) → `trends_import.py` → `kz_trends.xlsx`.
-- [ ] Выгрузить фразы из Wordstat по KZ (регион Казахстан) → `import` → `kz_yandex.xlsx`.
-- [ ] Заполнить `АНАЛИЗ_KZ_Google_vs_Yandex.md`: Trends (относит.) + Wordstat (абсолют), вердикт.
-- [ ] (Опц.) аккаунт Google Ads + карта → Keyword Planner для абсолютных чисел Google.
+- [x] `google-kwp-skill` — реализован; DataForSEO (по умолч., без карты), Google Ads API, ручной import CSV.
+- [x] `product-discovery-skill` — реализован; expand_seeds → cluster_demand → отчёт идей.
+- [ ] Положить `~/dataforseo.yaml` и прогнать засевы по KZ → `kz_google.xlsx`.
+- [ ] Кластеризовать спрос → `themes.xlsx`, заполнить `АНАЛИЗ_KZ_Google_спрос.md`.

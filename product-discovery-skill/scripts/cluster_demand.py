@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-cluster_demand.py — свести съём спроса (.xlsx из навыков wordstat/google-kwp) в
+cluster_demand.py — свести съём спроса (.xlsx из навыка google-kwp) в
 ТЕМЫ с суммарной частотой и топ-запросами. Это «скелет» рыночного анализа: из сотен
 строк получаем картину «по каким темам проектировщики и Госэкспертиза реально ищут».
 
 Что делает. Читает один или несколько .xlsx (колонки «запрос» и «ср_частота_мес» —
-схема навыков wordstat/google-kwp). Каждый запрос относит к теме по словарю ключевых
+схема навыка google-kwp). Каждый запрос относит к теме по словарю ключевых
 слов (тема = намерение рынка, напр. «Госэкспертиза», «Смета», «Чертежи/ГОСТ»).
 Суммирует частоту по теме, считает долю, выводит топ-запросы темы. Запрос, не попавший
 ни в одну тему, идёт в «прочее» — это сырьё для новых тем (смотри их вручную).
@@ -24,8 +24,8 @@ cluster_demand.py — свести съём спроса (.xlsx из навык�
 Ключи сопоставляются как подстроки в нижнем регистре (учитывают словоформы).
 
 Использование:
-  python cluster_demand.py --xlsx kz_yandex.xlsx --out themes.xlsx
-  python cluster_demand.py --xlsx kz_yandex.xlsx kz_google.xlsx --top 8 --themes my_themes.json
+  python cluster_demand.py --xlsx kz_google.xlsx --out themes.xlsx
+  python cluster_demand.py --xlsx kz_google.xlsx ru_google.xlsx --top 8 --themes my_themes.json
 """
 
 import argparse
@@ -39,7 +39,7 @@ from typing import Any, Dict, List, Optional, Tuple
 # разделы» (МОПБ, конструктив…) идут ВЫШЕ широких («экспертиза», «проектная документация»),
 # иначе «замечания по мопб» утечёт в «Госэкспертиза» и боль раздела не будет видна.
 # Это разрез под главную гипотезу: боль рынка — в конкретных разделах ПД, которые
-# труднее всего пройти на экспертизе. См. ../wordstat-skill/seeds_problem_sections.txt.
+# труднее всего пройти на экспертизе. См. ../google-kwp-skill/seeds_problem_sections.txt.
 DEFAULT_THEMES: Dict[str, List[str]] = {
     # --- проблемные разделы ПД (узкие, проверяются первыми) ---
     "Раздел: Пожарная безопасность (МОПБ)": ["мопб", "пожарн", "противопожарн", "пожаротушени",
@@ -86,7 +86,7 @@ def read_xlsx(path: str) -> List[Tuple[str, float]]:
     fi = find("частот", "показ", "volume", "avg_monthly")
     if qi is None or fi is None:
         sys.exit(f"[ОШИБКА] {path}: не нашёл колонки «запрос» и «ср_частота_мес».\n"
-                 f"Заголовок: {header}\nЭто .xlsx из навыка wordstat/google-kwp?")
+                 f"Заголовок: {header}\nЭто .xlsx из навыка google-kwp?")
 
     out: List[Tuple[str, float]] = []
     for r in rows[1:]:
@@ -190,7 +190,7 @@ def write_xlsx(path: str, summary: List[Dict[str, Any]], other: List[Tuple[str, 
 
 def main():
     ap = argparse.ArgumentParser(description="Кластеризация съёма спроса по темам рынка")
-    ap.add_argument("--xlsx", nargs="+", required=True, help="один/несколько .xlsx из навыков")
+    ap.add_argument("--xlsx", nargs="+", required=True, help="один/несколько .xlsx из навыка google-kwp")
     ap.add_argument("--themes", default=None, help="свой словарь тем (JSON: тема→[ключи])")
     ap.add_argument("--top", type=int, default=6, help="сколько топ-запросов показывать в теме")
     ap.add_argument("--out", default=None, help="результат .xlsx (без него — печать в консоль)")
