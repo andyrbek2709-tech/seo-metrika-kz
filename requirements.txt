@@ -1,0 +1,4 @@
+# Зависимости для деплоя Telegram-бота (Railway/Nixpacks ловит этот файл в корне).
+# Локально для скриптов навыков достаточно openpyxl — см. telegram-bot-skill/requirements.txt.
+python-telegram-bot>=21,<22
+openpyxl>=3.1

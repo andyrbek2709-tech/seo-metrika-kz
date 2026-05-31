@@ -20,6 +20,7 @@
 |---|---|
 | `google-kwp-skill/` | Съём спроса Google (Keyword Planner через DataForSEO): объёмы, идеи ключей, конкуренция, ставки. Гео KZ и другие страны. |
 | `product-discovery-skill/` | Оркестратор: превращает съём спроса в продуктовые идеи — генерация запросов → кластеризация в темы → отчёт с идеями на Claude. |
+| `telegram-bot-skill/` | Telegram-бот-витрина: по командам (`/themes`, `/top`, `/demand`, `/report`) отдаёт аналитику поверх выгрузок; приём CSV/`.xlsx`, очередь для live-съёма. Деплоится на Railway — см. `telegram-bot-skill/README.md`. |
 
 `google-kwp-skill` пишет `.xlsx` со схемой `запрос, тип, ср_частота_мес, конкуренция,
 индекс_конкуренции, ставка_верх_TOP, ставка_низ_TOP`. `product-discovery-skill` читает
