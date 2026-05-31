@@ -56,7 +56,7 @@ import cluster_demand      # noqa: E402  read_xlsx / cluster / DEFAULT_THEMES
 import expand_seeds        # noqa: E402  expand_one / with_geo / dedup
 
 try:
-    from telegram import Update
+    from telegram import BotCommand, Update
     from telegram.constants import ChatAction, ParseMode
     from telegram.ext import (
         Application, CommandHandler, ContextTypes, MessageHandler, filters,
@@ -292,18 +292,35 @@ HELP = (
     "🤖 <b>Бот съёма спроса Google (KZ)</b>\n\n"
     "Я отдаю аналитику по выгрузкам поискового спроса. Конвейер проекта:\n"
     "<code>засев → расширение → съём → кластеры → отчёт</code>\n\n"
-    "<b>Команды</b>\n"
-    "/themes [N] — кластеры спроса по темам (топ N тем, по умолч. 10)\n"
-    "/top [N] — топ-N запросов по частоте (по умолч. 15)\n"
-    "/demand &lt;фраза&gt; — расширить фразу и найти её в выгрузке (бесплатно)\n"
-    "/demand &lt;фраза&gt; live — снять свежий спрос через DataForSEO (в очередь)\n"
-    "/report — прислать текущую выгрузку .xlsx файлом\n"
-    "/status — что в работе и какая выгрузка активна\n\n"
+    "<b>Команды</b> (нажмите, чтобы выполнить):\n\n"
+    "/start — запустить бота и показать эту справку\n"
+    "/help — показать справку по всем командам\n"
+    "/themes — кластеры спроса по темам рынка\n"
+    "/top — топ-запросы по частоте из текущей выгрузки\n"
+    "/demand — раскрыть фразу в кандидатов и найти её в выгрузке\n"
+    "/report — прислать текущую выгрузку файлом .xlsx\n"
+    "/status — что сейчас в работе и какая выгрузка активна\n\n"
+    "<b>С параметрами</b> (наберите вручную):\n"
+    "• <code>/themes 15</code> — показать топ-15 тем (по умолчанию 10)\n"
+    "• <code>/top 30</code> — показать топ-30 запросов (по умолчанию 15)\n"
+    "• <code>/demand госэкспертиза</code> — расширить фразу и найти в выгрузке (бесплатно)\n"
+    "• <code>/demand госэкспертиза live</code> — снять свежий спрос через DataForSEO (в очередь)\n\n"
     "<b>Загрузка данных (бесплатно)</b>\n"
-    "Пришли мне <b>CSV</b> из веб-Планировщика Google (кнопка «Скачать варианты "
+    "Пришлите мне <b>CSV</b> из веб-Планировщика Google (кнопка «Скачать варианты "
     "ключевых слов») — я импортирую его в .xlsx и сделаю активным. Можно прислать "
     "и готовый <b>.xlsx</b> нашей схемы."
 )
+
+# Список команд для меню Telegram (кнопка «/» и подсказки автодополнения — кликабельны).
+BOT_COMMANDS = [
+    BotCommand("start", "Запустить бота и показать справку"),
+    BotCommand("help", "Справка по всем командам"),
+    BotCommand("themes", "Кластеры спроса по темам рынка"),
+    BotCommand("top", "Топ-запросы по частоте"),
+    BotCommand("demand", "Раскрыть фразу и найти её в выгрузке"),
+    BotCommand("report", "Прислать текущую выгрузку .xlsx"),
+    BotCommand("status", "Что в работе и какая выгрузка активна"),
+]
 
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -523,6 +540,11 @@ async def on_startup(app) -> None:
     app.bot_data["queue"] = asyncio.Queue()
     app.bot_data["busy"] = False
     app.bot_data["worker"] = asyncio.create_task(queue_worker(app))
+    # Регистрируем меню команд — они станут кликабельными подсказками в Telegram.
+    try:
+        await app.bot.set_my_commands(BOT_COMMANDS)
+    except Exception:  # noqa: BLE001
+        log.warning("Не удалось зарегистрировать меню команд (set_my_commands).")
     log.info("Бот запущен. DATA_DIR=%s", DATA_DIR)
 
 
