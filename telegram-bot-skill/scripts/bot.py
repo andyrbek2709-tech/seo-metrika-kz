@@ -69,6 +69,9 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(name)s: %(message)s",
 )
+# httpx на уровне INFO пишет полный URL запроса — а в нём токен бота. Приглушаем,
+# чтобы токен не утекал в логи (Railway/stdout).
+logging.getLogger("httpx").setLevel(logging.WARNING)
 log = logging.getLogger("seo-bot")
 
 DATA_DIR = os.environ.get("BOT_DATA_DIR", os.path.join(ROOT, "bot_data"))
