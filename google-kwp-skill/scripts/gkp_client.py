@@ -363,12 +363,34 @@ def _num(val: Any) -> float:
     return n
 
 
+def _one_num(tok: str) -> Optional[float]:
+    """Одно число с суффиксом-множителем: «1 тыс.»→1000, «10K»→10000, «2 млн»→2e6, «100»→100."""
+    t = (tok or "").strip().lower().replace("\xa0", " ")
+    m = re.search(r"(\d+(?:[.,]\d+)?)", t.replace(" ", ""))
+    if not m:
+        return None
+    n = float(m.group(1).replace(",", "."))
+    for suf, mult in (("млн", 1_000_000), ("тыс", 1_000), ("m", 1_000_000),
+                      ("k", 1_000), ("к", 1_000), ("м", 1_000_000)):
+        if suf in t:
+            n *= mult
+            break
+    return n
+
+
 def _freq_value(raw: str) -> Any:
-    # Чистое целое (точный объём) → int; диапазон/прочее («1 тыс. – 10 тыс.») → строка.
-    s = (raw or "").replace("\xa0", " ").replace(" ", "").replace(",", "")
-    if s.isdigit():
-        return int(s)
-    return (raw or "").strip() or None
+    # Точный объём → int. Диапазон Планировщика («1 тыс. – 10 тыс.», «10 – 100», «1K–10K»)
+    # → середина диапазона (числом), чтобы downstream-аналитика (топ, кластеры) работала.
+    s = (raw or "").replace("\xa0", " ").strip()
+    if not s:
+        return None
+    parts = re.split(r"\s*[–—\-]\s*", s)
+    nums = [x for x in (_one_num(p) for p in parts) if x is not None]
+    if not nums:
+        return None
+    if len(nums) >= 2:
+        return int(round((nums[0] + nums[1]) / 2))
+    return int(round(nums[0]))
 
 
 def import_csv(csv_path: str) -> List[Dict[str, Any]]:
