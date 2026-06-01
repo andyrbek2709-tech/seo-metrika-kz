@@ -143,10 +143,23 @@ def allowed(update: Update) -> bool:
 
 # === ВЫЧИСЛЕНИЯ (синхронные, гоняем в asyncio.to_thread) =====================
 
+def load_themes() -> Dict[str, List[str]]:
+    """Словарь тем: из env THEMES_FILE (свой набор, напр. софтовый) или дефолтный (стройка)."""
+    path = os.environ.get("THEMES_FILE", "").strip()
+    if path:
+        candidate = path if os.path.isabs(path) else os.path.join(ROOT, path)
+        try:
+            with open(candidate, encoding="utf-8") as fh:
+                return json.load(fh)
+        except (OSError, ValueError) as exc:
+            log.warning("THEMES_FILE не прочитан (%s): %s — беру дефолтные темы.", candidate, exc)
+    return cluster_demand.DEFAULT_THEMES
+
+
 def do_cluster(xlsx_path: str, top_themes: int) -> str:
     """Кластеры спроса по темам из текущей выгрузки → текст для Telegram."""
     items = guard(cluster_demand.read_xlsx, xlsx_path)
-    summary, other = guard(cluster_demand.cluster, items, cluster_demand.DEFAULT_THEMES, 3)
+    summary, other = guard(cluster_demand.cluster, items, load_themes(), 3)
     if not summary:
         return "Темы не выделились — в выгрузке нет распознанных запросов."
     lines = [f"📊 <b>Темы спроса</b> ({os.path.basename(xlsx_path)})", ""]

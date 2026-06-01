@@ -1,0 +1,48 @@
+# Seeds EN for software discovery: demand for "software / app / tool / calculator to do X".
+# Base topics (X). The expander wraps them in EN intents (software for X, X app,
+# X calculator, automate X...) — see expand_seeds.py, intent soft_en.
+# Edit freely. # = comment.
+
+# --- Business: accounting, sales, clients ---
+inventory management
+appointment scheduling
+invoicing
+payroll
+client management
+sales pipeline
+order tracking
+expense tracking
+project management
+time tracking
+field service
+
+# --- Oil & gas / engineering calculations ---
+pipeline hydraulics
+oil production forecast
+reservoir simulation
+pump sizing
+pressure drop
+gas pipeline
+
+# --- Construction / design engineering ---
+cost estimation
+structural load
+hvac load
+material takeoff
+lighting design
+foundation design
+
+# --- Service business niches ---
+beauty salon
+auto repair shop
+dental clinic
+gym membership
+property rental
+food delivery
+restaurant
+ecommerce store
+
+# --- Design ---
+interior design layout
+furniture arrangement
+landscape design
